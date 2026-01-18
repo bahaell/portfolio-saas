@@ -40,6 +40,8 @@ export const viewport: Viewport = {
   themeColor: "#215E61",
 }
 
+import { NextAuthProvider } from "@/components/providers/session-provider"
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,10 +50,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased flex flex-col min-h-screen`}>
-        <ThemeProvider initialThemeId="modern">
-          <div className="flex flex-col flex-1">{children}</div>
-          <Analytics />
-        </ThemeProvider>
+        <NextAuthProvider>
+          <ThemeProvider initialThemeId="modern">
+            <div className="flex flex-col flex-1">{children}</div>
+            <Analytics />
+          </ThemeProvider>
+        </NextAuthProvider>
       </body>
     </html>
   )

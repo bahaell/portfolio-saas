@@ -1,21 +1,19 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Portfolio, Template, Theme } from "@/models";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get("userId");
+        await connectDB();
+        const session = await getServerSession(authOptions);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: "userId parameter is required" },
-                { status: 400 }
-            );
+        if (!session || !session.user || !session.user.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        await connectDB();
-        const portfolios = await Portfolio.find({ userId });
+        const portfolios = await Portfolio.find({ userId: session.user.id });
         return NextResponse.json(portfolios);
     } catch (error) {
         return NextResponse.json(
@@ -27,8 +25,17 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
         await connectDB();
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user || !session.user.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await request.json();
+
+        // Force the userId to be the authenticated user's ID
+        body.userId = session.user.id;
 
         // Validate relationships
         const templateExists = await Template.exists({ _id: body.templateId });
@@ -39,10 +46,6 @@ export async function POST(request: Request) {
             );
         }
 
-        const themeExists = await Theme.exists({ _id: body.theme?.themeId });
-        // Note: theme.themeId is nested in body.theme
-        // The Portfolio Model expects: theme: { themeId: ObjectId, overrides: ... }
-        // If body.theme is passed, we assume validation of structure, but let's check themeId existence if provided.
         if (body.theme?.themeId) {
             const themeExists = await Theme.exists({ _id: body.theme.themeId });
             if (!themeExists) {
@@ -53,11 +56,10 @@ export async function POST(request: Request) {
             }
         }
 
-
         const portfolio = await Portfolio.create(body);
         return NextResponse.json(portfolio, { status: 201 });
     } catch (error) {
-        console.error(error); // Helpful for debugging early stages
+        console.error(error);
         return NextResponse.json(
             { error: "Internal Server Error" },
             { status: 500 }

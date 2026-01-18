@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Project } from "@/models";
+import { Project, Portfolio } from "@/models";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: Request) {
     try {
@@ -15,6 +17,18 @@ export async function GET(request: Request) {
         }
 
         await connectDB();
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user || !session.user.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Verify portfolio ownership
+        const portfolio = await Portfolio.findOne({ _id: portfolioId, userId: session.user.id });
+        if (!portfolio) {
+            return NextResponse.json({ error: "Portfolio not found or unauthorized" }, { status: 404 });
+        }
+
         const projects = await Project.find({ portfolioId });
         return NextResponse.json(projects);
     } catch (error) {
@@ -27,8 +41,20 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
         await connectDB();
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user || !session.user.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await request.json();
+
+        // Verify portfolio ownership
+        const portfolio = await Portfolio.findOne({ _id: body.portfolioId, userId: session.user.id });
+        if (!portfolio) {
+            return NextResponse.json({ error: "Portfolio not found or unauthorized" }, { status: 404 });
+        }
 
         const project = await Project.create(body);
         return NextResponse.json(project, { status: 201 });

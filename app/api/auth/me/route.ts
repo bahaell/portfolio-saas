@@ -1,21 +1,21 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
-// MOCK AUTH ENDPOINT for Step 2.3
-// Returns the first user found in the DB or creates a default one
 export async function GET() {
     await connectDB();
-    let user = await User.findOne({});
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user || !session.user.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await User.findById(session.user.id);
 
     if (!user) {
-        user = await User.create({
-            email: "demo@example.com",
-            passwordHash: "mock_hash",
-            name: "Demo User",
-            username: "demo" + Date.now(),
-            plan: "FREE",
-        });
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json(user);

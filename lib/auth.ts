@@ -1,42 +1,40 @@
-// Mock authentication utilities
-// In a real app, replace with actual auth implementation (Supabase, NextAuth, etc.)
+import { NextAuthOptions } from "next-auth"
+import GoogleProvider from "next-auth/providers/google"
+import GitHubProvider from "next-auth/providers/github"
+import { MongoDBAdapter } from "@auth/mongodb-adapter"
+import clientPromise from "./mongodb-client"
 
-export interface AuthUser {
-  id: string
-  email: string
-  name: string
-}
-
-// Mock: Check if user is authenticated
-export function isAuthenticated(): boolean {
-  // In a real app, check session/token validity
-  if (typeof window === "undefined") return false
-  return !!localStorage.getItem("auth-token")
-}
-
-// Mock: Get current user
-export function getCurrentUser(): AuthUser | null {
-  if (typeof window === "undefined") return null
-  const user = localStorage.getItem("current-user")
-  return user ? JSON.parse(user) : null
-}
-
-// Mock: Login user
-export function loginUser(email: string, password: string): void {
-  // In a real app, make API call to verify credentials
-  localStorage.setItem("auth-token", "mock-token-" + Date.now())
-  localStorage.setItem("current-user", JSON.stringify({ id: "user-1", email, name: "User" }))
-}
-
-// Mock: Register user
-export function registerUser(email: string, name: string, password: string): void {
-  // In a real app, make API call to create user
-  localStorage.setItem("auth-token", "mock-token-" + Date.now())
-  localStorage.setItem("current-user", JSON.stringify({ id: "user-" + Date.now(), email, name }))
-}
-
-// Mock: Logout user
-export function logoutUser(): void {
-  localStorage.removeItem("auth-token")
-  localStorage.removeItem("current-user")
+export const authOptions: NextAuthOptions = {
+  adapter: MongoDBAdapter(clientPromise),
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub
+      }
+      return session
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+      }
+      return token
+    },
+  },
+  pages: {
+    signIn: "/auth/login",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 }

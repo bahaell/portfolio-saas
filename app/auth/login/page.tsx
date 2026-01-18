@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Github, Mail } from "lucide-react"
 import { useState } from "react"
-// import { loginWithOAuthMock, loginMock } from "@/lib/auth-mock"
+import { signIn } from "next-auth/react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,9 +20,9 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      // loginMock(email, password)
-      // For now, API handles auth via 'me' endpoint automatically for demo
-      router.push("/dashboard/home")
+      // Email login not yet implemented with NextAuth in this step (only OAuth requested)
+      // But we can keep the UI if needed. For now redirecting or alert.
+      alert("Email login coming soon. Please use Google or GitHub.")
     } finally {
       setIsLoading(false)
     }
@@ -31,9 +31,9 @@ export default function LoginPage() {
   const handleOAuthLogin = async (provider: "github" | "google") => {
     setIsLoading(true)
     try {
-      // loginWithOAuthMock(provider)
-      // OAuth placeholder
-      router.push("/dashboard/home")
+      await signIn(provider, { callbackUrl: "/dashboard/home" })
+    } catch (error) {
+      console.error("Login failed", error)
     } finally {
       setIsLoading(false)
     }
