@@ -27,6 +27,11 @@ export interface ApiPortfolio {
         themeId: string;
         overrides?: any;
     };
+    seo?: {
+        title?: string;
+        description?: string;
+        image?: string;
+    };
     createdAt: string;
     updatedAt: string;
 }
@@ -95,6 +100,12 @@ export const apiService = {
     },
     createExperience: async (data: any) => {
         const response = await api.post<any>("/experiences", data); // Type any for now or interface
+        return response.data;
+    },
+    getExperiences: async (portfolioId: string) => {
+        const response = await api.get<any[]>(
+            `/experiences?portfolioId=${portfolioId}`
+        );
         return response.data;
     },
     getMe: async () => {

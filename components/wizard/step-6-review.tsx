@@ -11,10 +11,10 @@ interface Step6ReviewProps {
   wizard?: PortfolioWizard
   userPlan: "FREE" | "PREMIUM"
   onPublish?: () => void
+  isPublishing?: boolean
 }
 
-export function Step6Review({ wizard, userPlan, onPublish }: Step6ReviewProps) {
-  const [isPublishing, setIsPublishing] = useState(false)
+export function Step6Review({ wizard, userPlan, onPublish, isPublishing = false }: Step6ReviewProps) {
   const [toggles, setToggles] = useState({
     public: true,
     showContact: true,
@@ -31,11 +31,7 @@ export function Step6Review({ wizard, userPlan, onPublish }: Step6ReviewProps) {
 
   const completedCount = checklist.filter((item) => item.completed).length
 
-  const handlePublish = async () => {
-    setIsPublishing(true)
-    // Simulate publishing
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    setIsPublishing(false)
+  const handlePublish = () => {
     onPublish?.()
   }
 
@@ -166,11 +162,10 @@ export function Step6Review({ wizard, userPlan, onPublish }: Step6ReviewProps) {
       <Button
         onClick={handlePublish}
         disabled={isPublishing || completedCount < checklist.length}
-        className={`w-full py-3 font-semibold gap-2 ${
-          isPublishing || completedCount < checklist.length
+        className={`w-full py-3 font-semibold gap-2 ${isPublishing || completedCount < checklist.length
             ? "opacity-50 cursor-not-allowed"
             : "bg-accent hover:bg-accent/90 text-accent-foreground"
-        }`}
+          }`}
       >
         {isPublishing ? (
           <>

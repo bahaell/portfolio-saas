@@ -1,25 +1,63 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
-import { mockPortfolios, mockPortfolioWizards, currentUser } from "@/lib/mock-data"
+// import { mockPortfolios, mockPortfolioWizards, currentUser } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ChevronLeft, Edit3, Share2 } from "lucide-react"
+import { ChevronLeft, Edit3, Share2, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { ModernTemplate } from "@/components/templates"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { THEME_REGISTRY } from "@/lib/themes/registry"
 import type { PortfolioData } from "@/lib/types/theme"
+import { useEffect, useState } from "react"
+import apiService, { ApiPortfolio, ApiProject, ApiSkill, ApiUser } from "@/lib/api"
 
 export default function PortfolioDetailPage() {
   const params = useParams()
   const router = useRouter()
   const portfolioId = params.id as string
 
-  const portfolio = mockPortfolios.find((p) => p.id === portfolioId && p.userId === currentUser.id)
-  const wizard = mockPortfolioWizards.find((w) => w.userId === currentUser.id)
+  const [portfolio, setPortfolio] = useState<ApiPortfolio | null>(null)
+  const [projects, setProjects] = useState<ApiProject[]>([])
+  const [skills, setSkills] = useState<ApiSkill[]>([])
+  const [experiences, setExperiences] = useState<any[]>([])
+  const [user, setUser] = useState<ApiUser | null>(null) // Need user for name/email
+  const [loading, setLoading] = useState(true)
 
-  if (!portfolio || !wizard) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [p, prj, sk, exp, u] = await Promise.all([
+          apiService.getPortfolio(portfolioId),
+          apiService.getProjects(portfolioId),
+          apiService.getSkills(portfolioId),
+          apiService.getExperiences(portfolioId),
+          apiService.getMe()
+        ])
+        setPortfolio(p)
+        setProjects(prj)
+        setSkills(sk)
+        setExperiences(exp)
+        setUser(u)
+      } catch (error) {
+        console.error("Failed to load portfolio details", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [portfolioId])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!portfolio || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -32,39 +70,46 @@ export default function PortfolioDetailPage() {
     )
   }
 
-  // Convert wizard data to PortfolioData format
+  // Convert API data to PortfolioData format for template preview
   const portfolioData: PortfolioData = {
-    id: portfolio.id,
+    id: portfolio._id,
     title: portfolio.title,
-    description: wizard.profile?.bio || "",
-    name: wizard.profile?.fullName || "",
-    email: wizard.profile?.email || "",
-    phone: wizard.profile?.phone,
-    website: wizard.profile?.website,
+    description: portfolio.seo?.description || "",
+    name: user.name || "",
+    email: user.email || "",
+    phone: "", // Missing from DB
+    website: "", // Missing from DB
     social: {
-      linkedin: wizard.profile?.socialLinks?.find((s) => s.platform === "LinkedIn")?.url,
-      github: wizard.profile?.socialLinks?.find((s) => s.platform === "GitHub")?.url,
-      twitter: wizard.profile?.socialLinks?.find((s) => s.platform === "Twitter")?.url,
+      linkedin: undefined,
+      github: undefined,
+      twitter: undefined
     },
-    projects: wizard.projects?.map((p) => ({
-      id: p.id,
+    projects: projects.map((p) => ({
+      id: p._id,
       title: p.title,
       description: p.description,
-      tags: p.technologies,
-      link: `/portfolio/${portfolio.id}/project/${p.id}`,
+      tags: p.stack,
+      link: p.demoUrl || p.githubUrl || undefined,
     })),
-    skills: wizard.skills?.map((s) => ({
-      id: s.id,
+    skills: skills.map((s) => ({
+      id: s._id,
       name: s.name,
-      level: s.proficiency === 4 || s.proficiency === 5 ? "expert" : s.proficiency === 3 ? "intermediate" : "beginner",
+      level: s.level.toLowerCase() as any, // "expert" | "intermediate" | "beginner" | "advanced"
     })),
-    about: wizard.profile?.bio,
+    about: "", // Missing from DB
   }
 
-  const theme = THEME_REGISTRY[wizard.theme || "modern"] || THEME_REGISTRY.modern
+  // Theme handling: currently api returns theme object, need to map to registry key if possible?
+  // The backend stores theme: { themeId: string, overrides: ... }
+  // We need to resolve themeId to a key like "modern", or use default.
+  // For now, assuming "modern" as default or fetching theme name from API if we had a themes endpoint call.
+  // But we didn't fetch themes. Let's assume "modern" for safety or id-based if we knew mapping.
+  // Actually Step 2.3 might have used theme.themeId.
+  const themeKey = "modern" // Defaulting to modern because we don't have the Theme map loaded here.
+  const theme = THEME_REGISTRY[themeKey] || THEME_REGISTRY.modern
 
   return (
-    <ThemeProvider initialThemeId={wizard.theme || "modern"}>
+    <ThemeProvider initialThemeId={themeKey}>
       <div className="min-h-screen bg-background">
         {/* Top Navigation */}
         <div className="border-b border-border bg-card">
@@ -78,7 +123,8 @@ export default function PortfolioDetailPage() {
               <div>
                 <h1 className="text-xl font-bold">{portfolio.title}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {portfolio.published ? "Published" : "Draft"} • {portfolio.completionPercentage}% complete
+                  {portfolio.status === "published" ? "Published" : "Draft"}
+                  {/* Completion % calculation is missing/expensive, skipping or placeholder */}
                 </p>
               </div>
             </div>
@@ -87,7 +133,7 @@ export default function PortfolioDetailPage() {
                 <Share2 className="w-4 h-4" />
                 Share
               </Button>
-              <Link href={`/dashboard/portfolios/${portfolio.id}/customize`}>
+              <Link href={`/dashboard/portfolios/${portfolio._id}/customize`}>
                 <Button className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground">
                   <Edit3 className="w-4 h-4" />
                   Customize

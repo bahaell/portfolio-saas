@@ -182,7 +182,7 @@ export default function NewPortfolioWizard() {
               title: project.title,
               description: project.description,
               stack: project.technologies,
-              demourl: project.link,
+              demourl: project.liveLink,
               // images? Wizard might have image urls?
             })
           )
@@ -196,7 +196,7 @@ export default function NewPortfolioWizard() {
             apiService.createExperience({
               portfolioId: createdPortfolio._id,
               company: exp.company,
-              role: exp.position,
+              role: exp.role,
               startDate: exp.startDate,
               endDate: exp.endDate,
               description: exp.description,

@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Github, Mail } from "lucide-react"
 import { useState } from "react"
-import { loginWithOAuthMock, loginMock } from "@/lib/auth-mock"
+// import { loginWithOAuthMock, loginMock } from "@/lib/auth-mock"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,7 +20,8 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      loginMock(email, password)
+      // loginMock(email, password)
+      // For now, API handles auth via 'me' endpoint automatically for demo
       router.push("/dashboard/home")
     } finally {
       setIsLoading(false)
@@ -30,7 +31,8 @@ export default function LoginPage() {
   const handleOAuthLogin = async (provider: "github" | "google") => {
     setIsLoading(true)
     try {
-      loginWithOAuthMock(provider)
+      // loginWithOAuthMock(provider)
+      // OAuth placeholder
       router.push("/dashboard/home")
     } finally {
       setIsLoading(false)

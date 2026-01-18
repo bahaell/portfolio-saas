@@ -1,6 +1,6 @@
 "use client"
 
-import type { User } from "@/lib/mock-data"
+import type { ApiUser } from "@/lib/api"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +12,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Settings, LogOut, Moon, Sun, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { logoutMock } from "@/lib/auth-mock"
+// import { logoutMock } from "@/lib/auth-mock"
 import { useThemeMode } from "@/lib/hooks/useThemeMode"
 import { NotificationDropdown } from "./notification-dropdown"
 
 interface TopbarProps {
-  user: User
+  user: ApiUser
   pageTitle?: string
 }
 
@@ -26,8 +26,8 @@ export function Topbar({ user, pageTitle }: TopbarProps) {
   const { mode, toggleThemeMode, mounted } = useThemeMode()
 
   const handleLogout = () => {
-    logoutMock()
-    // Hard refresh to clear auth state and allow middleware to properly redirect
+    // logoutMock()
+    // For now, redirect to login which serves as logout in this demo state
     window.location.href = "/auth/login"
   }
   return (
@@ -57,7 +57,7 @@ export function Topbar({ user, pageTitle }: TopbarProps) {
                   <p className="text-xs text-muted-foreground">{user.plan === "PREMIUM" ? "Pro" : "Free"}</p>
                 </div>
                 <Avatar className="w-9 h-9">
-                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                  <AvatarImage src={"/placeholder.svg"} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
               </button>
@@ -65,7 +65,7 @@ export function Topbar({ user, pageTitle }: TopbarProps) {
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex items-center gap-2 p-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                  <AvatarImage src={"/placeholder.svg"} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

@@ -1,12 +1,39 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { currentUser, mockAnalytics } from "@/lib/mock-data"
-import { Eye, Users, TrendingUp } from "lucide-react"
+// import { currentUser, mockAnalytics } from "@/lib/mock-data"
+import { Eye, Users, TrendingUp, Loader2 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { useEffect, useState } from "react"
+import apiService, { ApiUser } from "@/lib/api"
 
 export default function AnalyticsPage() {
-  if (currentUser.plan === "FREE") {
+  const [user, setUser] = useState<ApiUser | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userData = await apiService.getMe()
+        setUser(userData)
+      } catch (error) {
+        console.error("Failed to load user", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!user || user.plan === "FREE") {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
@@ -35,6 +62,13 @@ export default function AnalyticsPage() {
     )
   }
 
+  // Placeholder for when real analytics API exists
+  const analyticsData = {
+    views: 0,
+    uniqueVisitors: 0,
+    monthlyStats: []
+  }
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
@@ -48,7 +82,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Total Views</p>
-              <p className="text-3xl font-bold text-foreground">{mockAnalytics.views.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-foreground">{analyticsData.views.toLocaleString()}</p>
             </div>
             <Eye className="w-8 h-8 text-primary/20" />
           </div>
@@ -58,7 +92,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Unique Visitors</p>
-              <p className="text-3xl font-bold text-foreground">{mockAnalytics.uniqueVisitors}</p>
+              <p className="text-3xl font-bold text-foreground">{analyticsData.uniqueVisitors}</p>
             </div>
             <Users className="w-8 h-8 text-accent/20" />
           </div>
@@ -68,7 +102,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Avg. Bounce Rate</p>
-              <p className="text-3xl font-bold text-foreground">32%</p>
+              <p className="text-3xl font-bold text-foreground">0%</p>
             </div>
             <TrendingUp className="w-8 h-8 text-green-500/20" />
           </div>
@@ -78,8 +112,12 @@ export default function AnalyticsPage() {
       {/* Chart */}
       <Card className="p-6 border-border/50">
         <h3 className="text-lg font-semibold text-foreground mb-6">Monthly Performance</h3>
+        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+          No data available yet
+        </div>
+        {/*
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={mockAnalytics.monthlyStats}>
+          <LineChart data={analyticsData.monthlyStats}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
             <XAxis dataKey="month" stroke="var(--color-muted-foreground)" />
             <YAxis stroke="var(--color-muted-foreground)" />
@@ -95,6 +133,7 @@ export default function AnalyticsPage() {
             <Line type="monotone" dataKey="visitors" stroke="var(--color-accent)" name="Visitors" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
+        */}
       </Card>
     </div>
   )

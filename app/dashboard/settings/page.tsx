@@ -2,10 +2,41 @@
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { currentUser } from "@/lib/mock-data"
-import { CreditCard, Bell, Shield, Palette, Check } from "lucide-react"
+// import { currentUser } from "@/lib/mock-data"
+import { CreditCard, Bell, Shield, Palette, Check, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import apiService, { ApiUser } from "@/lib/api"
 
 export default function SettingsPage() {
+  const [user, setUser] = useState<ApiUser | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userData = await apiService.getMe()
+        setUser(userData)
+      } catch (error) {
+        console.error("Failed to load user", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <div>Failed to load user settings</div>
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
@@ -25,11 +56,11 @@ export default function SettingsPage() {
               <div className="space-y-3 mb-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="text-foreground font-medium">{currentUser.name}</p>
+                  <p className="text-foreground font-medium">{user.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="text-foreground font-medium">{currentUser.email}</p>
+                  <p className="text-foreground font-medium">{user.email}</p>
                 </div>
               </div>
               <Button variant="outline" size="sm">
@@ -50,15 +81,14 @@ export default function SettingsPage() {
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-3">
                   <span
-                    className={`px-3 py-1 rounded text-sm font-semibold ${
-                      currentUser.plan === "PREMIUM" ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"
-                    }`}
+                    className={`px-3 py-1 rounded text-sm font-semibold ${user.plan === "PREMIUM" ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"
+                      }`}
                   >
-                    {currentUser.plan === "PREMIUM" ? "Premium" : "Free"}
+                    {user.plan === "PREMIUM" ? "Premium" : "Free"}
                   </span>
                 </div>
 
-                {currentUser.plan === "PREMIUM" ? (
+                {user.plan === "PREMIUM" ? (
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground mb-3">You have access to:</p>
                     <ul className="space-y-2">
@@ -110,7 +140,7 @@ export default function SettingsPage() {
                   </div>
                 )}
               </div>
-              {currentUser.plan === "FREE" ? (
+              {user.plan === "FREE" ? (
                 <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">Upgrade to Premium</Button>
               ) : (
                 <Button variant="outline" size="sm">
