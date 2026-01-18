@@ -79,10 +79,22 @@ export const apiService = {
         );
         return response.data;
     },
+    createProject: async (data: any) => {
+        const response = await api.post<ApiProject>("/projects", data);
+        return response.data;
+    },
     getSkills: async (portfolioId: string) => {
         const response = await api.get<ApiSkill[]>(
             `/skills?portfolioId=${portfolioId}`
         );
+        return response.data;
+    },
+    createSkill: async (data: any) => {
+        const response = await api.post<ApiSkill>("/skills", data);
+        return response.data;
+    },
+    createExperience: async (data: any) => {
+        const response = await api.post<any>("/experiences", data); // Type any for now or interface
         return response.data;
     },
     getMe: async () => {
