@@ -217,7 +217,7 @@ export default function CustomizePortfolioPage() {
           <ThemeBuilder
             initialThemeId={currentThemeId}
             portfolio={portfolioData}
-            userTier={user.plan === "PREMIUM" ? "premium" : "free"}
+            userTier={user.plan === "FREE" ? "free" : "premium"}
             onSave={handleSaveTheme}
           />
         </div>

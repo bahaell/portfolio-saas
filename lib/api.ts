@@ -1,4 +1,5 @@
 import axios from "axios";
+import { PlanType } from "./config/plans";
 
 const api = axios.create({
     baseURL: "/api",
@@ -12,7 +13,7 @@ export interface ApiUser {
     email: string;
     name: string;
     username: string;
-    plan: "FREE" | "PREMIUM";
+    plan: PlanType;
     isActive: boolean;
 }
 

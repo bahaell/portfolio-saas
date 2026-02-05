@@ -7,9 +7,11 @@ import type { PortfolioWizard } from "@/lib/wizard-types"
 import { CheckCircle2, Globe, MessageSquare, Eye, Lock, ArrowRight } from "lucide-react"
 import { useState } from "react"
 
+import { PlanType, PLANS } from "@/lib/config/plans"
+
 interface Step6ReviewProps {
   wizard?: PortfolioWizard
-  userPlan: "FREE" | "PREMIUM"
+  userPlan: PlanType
   onPublish?: () => void
   isPublishing?: boolean
 }
@@ -112,7 +114,7 @@ export function Step6Review({ wizard, userPlan, onPublish, isPublishing = false 
           </div>
         </label>
 
-        {userPlan === "PREMIUM" && (
+        {userPlan !== "FREE" && (
           <label className="flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
             <input
               type="checkbox"
@@ -132,7 +134,7 @@ export function Step6Review({ wizard, userPlan, onPublish, isPublishing = false 
       </div>
 
       {/* Domain Connection (Premium) */}
-      {userPlan === "PREMIUM" ? (
+      {PLANS[userPlan].customDomain ? (
         <Card className="p-6 bg-accent/5 border border-accent/20">
           <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <Globe className="w-4 h-4" />
@@ -163,8 +165,8 @@ export function Step6Review({ wizard, userPlan, onPublish, isPublishing = false 
         onClick={handlePublish}
         disabled={isPublishing || completedCount < checklist.length}
         className={`w-full py-3 font-semibold gap-2 ${isPublishing || completedCount < checklist.length
-            ? "opacity-50 cursor-not-allowed"
-            : "bg-accent hover:bg-accent/90 text-accent-foreground"
+          ? "opacity-50 cursor-not-allowed"
+          : "bg-accent hover:bg-accent/90 text-accent-foreground"
           }`}
       >
         {isPublishing ? (

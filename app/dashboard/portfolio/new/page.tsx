@@ -12,6 +12,7 @@ import { Step6Review } from "@/components/wizard/step-6-review";
 import apiService, { ApiUser } from "@/lib/api";
 import type { PortfolioWizard } from "@/lib/wizard-types";
 import { Loader2 } from "lucide-react";
+import { PlanType } from "@/lib/config/plans";
 
 const TOTAL_STEPS = 6;
 

@@ -9,10 +9,12 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, Star, Code2 } from "lucide-react"
 import { useState } from "react"
 
+import { PlanType } from "@/lib/config/plans"
+
 interface Step5ProjectsProps {
   projects?: PortfolioProject[]
   onUpdate: (projects: PortfolioProject[]) => void
-  userPlan: "FREE" | "PREMIUM"
+  userPlan: PlanType
 }
 
 export function Step5Projects({ projects = [], onUpdate, userPlan }: Step5ProjectsProps) {
@@ -84,7 +86,7 @@ export function Step5Projects({ projects = [], onUpdate, userPlan }: Step5Projec
 
   const toggleFeatured = (id: string) => {
     const featuredCount = localProjects.filter((p) => p.featured).length
-    const canAddMore = userPlan === "PREMIUM" || featuredCount < 3
+    const canAddMore = userPlan !== "FREE" || featuredCount < 3
 
     setLocalProjects(localProjects.map((p) => (p.id === id && canAddMore ? { ...p, featured: !p.featured } : p)))
   }
@@ -158,9 +160,8 @@ export function Step5Projects({ projects = [], onUpdate, userPlan }: Step5Projec
                   variant="ghost"
                   size="sm"
                   onClick={() => toggleFeatured(proj.id)}
-                  className={`gap-1 ${
-                    proj.featured ? "text-accent hover:text-accent" : "text-muted-foreground hover:text-accent"
-                  }`}
+                  className={`gap-1 ${proj.featured ? "text-accent hover:text-accent" : "text-muted-foreground hover:text-accent"
+                    }`}
                 >
                   <Star className={`w-4 h-4 ${proj.featured ? "fill-current" : ""}`} />
                   {proj.featured ? "Featured" : "Feature"}

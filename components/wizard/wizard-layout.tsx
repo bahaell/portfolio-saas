@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { CheckCircle2, ChevronRight, Lock } from "lucide-react"
 
+import { PlanType } from "@/lib/config/plans"
+
 interface WizardStep {
   number: number
   title: string
@@ -21,7 +23,7 @@ interface WizardLayoutProps {
   children: React.ReactNode
   onNext?: () => void
   onPrevious?: () => void
-  userPlan: "FREE" | "PREMIUM"
+  userPlan: PlanType
 }
 
 export function WizardLayout({

@@ -4,14 +4,17 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, BookOpen, Briefcase, Star, BarChart3, Settings, LogOut, Menu, X, Lock } from "lucide-react"
+import { PlanType } from "@/lib/config/plans"
+import { UpgradeModal } from "@/components/saas/UpgradeModal"
 
 interface SidebarProps {
-  userPlan: "FREE" | "PREMIUM"
+  userPlan: PlanType
 }
 
 export function Sidebar({ userPlan }: SidebarProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   const navigationItems = [
     {
@@ -51,6 +54,8 @@ export function Sidebar({ userPlan }: SidebarProps) {
 
   return (
     <>
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+
       {/* Mobile menu button */}
       <Button
         variant="ghost"
@@ -84,6 +89,8 @@ export function Sidebar({ userPlan }: SidebarProps) {
             {navigationItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
+              // Example logic: if item.premium is true and plan is FREE, lock it.
+              // We should probably rely on a config or explicit check, but this is fine for sidebar state.
               const isLocked = item.premium && userPlan === "FREE"
 
               return (
@@ -92,12 +99,13 @@ export function Sidebar({ userPlan }: SidebarProps) {
                     <div
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium",
-                        "text-sidebar-foreground/50 cursor-not-allowed",
+                        "text-sidebar-foreground/50 cursor-not-allowed opacity-70",
                       )}
+                      onClick={() => setShowUpgradeModal(true)}
                     >
                       <Icon className="w-5 h-5" />
                       <span className="flex-1">{item.label}</span>
-                      <Lock className="w-4 h-4 text-accent" />
+                      <Lock className="w-4 h-4 text-muted-foreground" />
                     </div>
                   ) : (
                     <Link
@@ -124,8 +132,12 @@ export function Sidebar({ userPlan }: SidebarProps) {
             <div className="mb-4 p-4 bg-accent/10 rounded-lg border border-accent/20">
               <p className="text-xs font-semibold text-foreground mb-2">Unlock Premium</p>
               <p className="text-xs text-foreground/70 mb-3">Get access to advanced analytics and more.</p>
-              <Button size="sm" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                Upgrade
+              <Button
+                size="sm"
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={() => setShowUpgradeModal(true)}
+              >
+                Upgrade to PRO
               </Button>
             </div>
           )}

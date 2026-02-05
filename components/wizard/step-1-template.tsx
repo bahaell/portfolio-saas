@@ -9,11 +9,12 @@ import { PORTFOLIO_TEMPLATES } from "@/lib/wizard-types"
 import type { TemplateType } from "@/lib/wizard-types"
 import { CheckCircle2, Eye, Lock, Sparkles } from "lucide-react"
 import { useState } from "react"
+import { PlanType, PLANS } from "@/lib/config/plans"
 
 interface Step1TemplateProps {
   selected?: TemplateType
   onSelect: (template: TemplateType) => void
-  userPlan: "FREE" | "PREMIUM"
+  userPlan: PlanType
 }
 
 export function Step1Template({ selected, onSelect, userPlan }: Step1TemplateProps) {
@@ -33,17 +34,18 @@ export function Step1Template({ selected, onSelect, userPlan }: Step1TemplatePro
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {PORTFOLIO_TEMPLATES.map((template) => {
-          const isLocked = template.premium && userPlan === "FREE"
+          // Check if plan allows premium templates
+          const allowsPremium = PLANS[userPlan].premiumTemplates;
+          const isLocked = template.premium && !allowsPremium;
           const isSelected = selected === template.id
 
           return (
             <div key={template.id} onClick={() => !isLocked && onSelect(template.id)} className="cursor-pointer group">
               <Card
                 className={cn(
-                  `overflow-hidden border-2 transition-all duration-300 hover-lift ${
-                    isSelected
-                      ? "border-accent shadow-premium-lg bg-accent/5 scale-105"
-                      : "border-border/50 hover:border-accent/50 hover:shadow-lg"
+                  `overflow-hidden border-2 transition-all duration-300 hover-lift ${isSelected
+                    ? "border-accent shadow-premium-lg bg-accent/5 scale-105"
+                    : "border-border/50 hover:border-accent/50 hover:shadow-lg"
                   } ${isLocked ? "opacity-60" : ""}`,
                 )}
               >
@@ -83,7 +85,7 @@ export function Step1Template({ selected, onSelect, userPlan }: Step1TemplatePro
                     )}
                   </div>
 
-                  {template.premium && userPlan === "FREE" && (
+                  {template.premium && !PLANS[userPlan].premiumTemplates && (
                     <Badge variant="outline" className="mb-3">
                       Premium
                     </Badge>
@@ -106,11 +108,10 @@ export function Step1Template({ selected, onSelect, userPlan }: Step1TemplatePro
                     {!isLocked && (
                       <Button
                         size="sm"
-                        className={`flex-1 ${
-                          isSelected
-                            ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                            : "bg-primary text-primary-foreground hover:bg-primary/90"
-                        }`}
+                        className={`flex-1 ${isSelected
+                          ? "bg-accent text-accent-foreground hover:bg-accent/90"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90"
+                          }`}
                       >
                         {isSelected ? "Selected" : "Select"}
                       </Button>

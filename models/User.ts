@@ -25,8 +25,13 @@ const UserSchema: Schema = new Schema(
         emailVerified: { type: Date, default: null },
         plan: {
             type: String,
-            enum: ["FREE", "PREMIUM"],
+            enum: ["FREE", "PRO", "ELITE"], // Updated plans
             default: "FREE",
+        },
+        subscriptionStatus: {
+            type: String,
+            enum: ["active", "inactive", "expired"],
+            default: "active",
         },
         isActive: { type: Boolean, default: true },
     },

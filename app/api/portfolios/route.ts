@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Portfolio, Template, Theme } from "@/models";
 
+import { checkPortfolioLimit } from "@/lib/saas/gating";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
@@ -39,6 +40,17 @@ export async function POST(request: Request) {
         }
 
         const userId = (session.user as any).id;
+
+        // Feature Gating: Check Portfolio Limit
+        // NOTE: checkPortfolioLimit is not defined in this snippet, assuming it's imported or defined elsewhere.
+        const { allowed, max, current } = await checkPortfolioLimit(userId);
+        if (!allowed) {
+            return NextResponse.json(
+                { error: `Plan limit reached. You can only create ${max} portfolios on your current plan.` },
+                { status: 403 }
+            );
+        }
+
         const body = await request.json();
 
         // Force userId from session
