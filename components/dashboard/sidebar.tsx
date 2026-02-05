@@ -1,15 +1,12 @@
-"use client"
-
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import type { UserPlan } from "@/lib/mock-data"
 import { LayoutDashboard, BookOpen, Briefcase, Star, BarChart3, Settings, LogOut, Menu, X, Lock } from "lucide-react"
 
 interface SidebarProps {
-  userPlan: UserPlan
+  userPlan: "FREE" | "PREMIUM"
 }
 
 export function Sidebar({ userPlan }: SidebarProps) {

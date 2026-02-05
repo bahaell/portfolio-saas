@@ -52,7 +52,7 @@ export function ThemeBuilder({ initialThemeId = "modern", portfolio, userTier, o
         ...prev.colors,
         [key]: value,
       },
-    }))
+    } as any))
   }, [])
 
   const handleFontChange = useCallback((key: string, value: string) => {
@@ -62,7 +62,7 @@ export function ThemeBuilder({ initialThemeId = "modern", portfolio, userTier, o
         ...prev.fonts,
         [key]: value,
       },
-    }))
+    } as any))
   }, [])
 
   const handleSpacingChange = useCallback((key: string, value: number) => {
@@ -72,7 +72,7 @@ export function ThemeBuilder({ initialThemeId = "modern", portfolio, userTier, o
         ...prev.spacing,
         [key]: value,
       },
-    }))
+    } as any))
   }, [])
 
   const handleReset = useCallback(() => {
@@ -82,7 +82,7 @@ export function ThemeBuilder({ initialThemeId = "modern", portfolio, userTier, o
   const handleSectionToggle = useCallback((section: string) => {
     setVisibleSections((prev) => ({
       ...prev,
-      [section]: !prev[section],
+      [section as keyof typeof visibleSections]: !prev[section as keyof typeof visibleSections],
     }))
   }, [])
 
@@ -111,11 +111,10 @@ export function ThemeBuilder({ initialThemeId = "modern", portfolio, userTier, o
                   key={themeId}
                   onClick={() => setSelectedThemeId(themeId)}
                   disabled={userTier === "free" && themeId !== "modern"}
-                  className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${
-                    selectedThemeId === themeId
-                      ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
-                      : "bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-600"
-                  } ${userTier === "free" && themeId !== "modern" ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-700/50"}`}
+                  className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedThemeId === themeId
+                    ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
+                    : "bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-600"
+                    } ${userTier === "free" && themeId !== "modern" ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-700/50"}`}
                 >
                   {theme.name}
                   {userTier === "free" && themeId !== "modern" && <span className="ml-2 text-xs">PRO</span>}

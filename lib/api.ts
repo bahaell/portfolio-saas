@@ -102,12 +102,6 @@ export const apiService = {
         const response = await api.post<any>("/experiences", data); // Type any for now or interface
         return response.data;
     },
-    getExperiences: async (portfolioId: string) => {
-        const response = await api.get<any[]>(
-            `/experiences?portfolioId=${portfolioId}`
-        );
-        return response.data;
-    },
     getMe: async () => {
         const response = await api.get<ApiUser>("/auth/me");
         return response.data;

@@ -1,42 +1,43 @@
 "use client"
 
-import type React from "react"
-
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useState, useEffect } from "react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Github, Mail } from "lucide-react"
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Github, Loader2, ArrowLeft } from "lucide-react" // Using Loader2 as generic spinner
+// Using a generic icon for Google if 'Chrome' or 'Google' icon isn't available in lucide-react (Chrome is)
+import { Chrome } from "lucide-react"
+import Link from "next/link"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("sarah@example.com")
-  const [password, setPassword] = useState("password")
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session, status } = useSession()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard")
+    }
+  }, [status, router])
+
+  const handleOAuthLogin = async (provider: "google" | "github") => {
     setIsLoading(true)
     try {
-      // Email login not yet implemented with NextAuth in this step (only OAuth requested)
-      // But we can keep the UI if needed. For now redirecting or alert.
-      alert("Email login coming soon. Please use Google or GitHub.")
-    } finally {
+      await signIn(provider, { callbackUrl: "/dashboard" })
+    } catch (error) {
+      console.error("Login failed:", error)
       setIsLoading(false)
     }
   }
 
-  const handleOAuthLogin = async (provider: "github" | "google") => {
-    setIsLoading(true)
-    try {
-      await signIn(provider, { callbackUrl: "/dashboard/home" })
-    } catch (error) {
-      console.error("Login failed", error)
-    } finally {
-      setIsLoading(false)
-    }
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-muted/20">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -49,86 +50,55 @@ export default function LoginPage() {
         </Link>
       </div>
 
-      {/* Login form */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md border-border/50">
-          <div className="p-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back</h1>
-              <p className="text-muted-foreground">Sign in to your account to continue</p>
-            </div>
-
-            <div className="space-y-4 mb-6">
+      <div className="flex items-center justify-center flex-1 bg-muted/20 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center space-y-2">
+            <Link href="/" className="inline-block mx-auto mb-4">
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Portfora
+              </span>
+            </Link>
+            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardDescription>Sign in to your account to continue building</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <Button
-                type="button"
-                disabled={isLoading}
-                onClick={() => handleOAuthLogin("github")}
                 variant="outline"
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <Github className="w-4 h-4" />
-                <span>Continue with GitHub</span>
-              </Button>
-              <Button
-                type="button"
-                disabled={isLoading}
                 onClick={() => handleOAuthLogin("google")}
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <Mail className="w-4 h-4" />
-                <span>Continue with Google</span>
-              </Button>
-            </div>
-
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-card text-muted-foreground">Or continue with email</span>
-              </div>
-            </div>
-
-            <form className="space-y-4" onSubmit={handleLogin}>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-border bg-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-border bg-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <Button
                 disabled={isLoading}
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               >
-                {isLoading ? "Signing in..." : "Sign in with Email"}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Chrome className="mr-2 h-4 w-4" />}
+                Google
               </Button>
-            </form>
+              <Button
+                variant="outline"
+                onClick={() => handleOAuthLogin("github")}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Github className="mr-2 h-4 w-4" />}
+                GitHub
+              </Button>
+            </div>
 
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Don't have an account?{" "}
-              <Link href="/auth/signup" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+              </div>
+            </div>
+
+            <div className="text-center text-sm text-muted-foreground">
+              Email/Password logic is currently disabled in favor of minimal OAuth setup for this step.
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-4 text-center text-sm text-muted-foreground">
+            <p>
+              By clicking continue, you agree to our <Link href="/terms" className="underline hover:text-primary">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-primary">Privacy Policy</Link>.
             </p>
-          </div>
+          </CardFooter>
         </Card>
       </div>
     </div>

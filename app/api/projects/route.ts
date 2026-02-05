@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Project, Portfolio } from "@/models";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { Project } from "@/models";
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { Portfolio } from "@/models";
 
 export async function GET(request: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        // We allow both authenticated access AND public access if portfolio is published?
+        // Requirement says "Protect all /dashboard/* routes". API usually matches.
+        // Public pages use server-side helper. So we can strictly protect API for dashboard.
+        if (!session || !session.user?.email) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { searchParams } = new URL(request.url);
         const portfolioId = searchParams.get("portfolioId");
 
@@ -17,16 +27,16 @@ export async function GET(request: Request) {
         }
 
         await connectDB();
-        const session = await getServerSession(authOptions);
 
-        if (!session || !session.user || !session.user.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        // Verify ownership
+        const portfolio = await Portfolio.findById(portfolioId);
+        if (!portfolio) {
+            return NextResponse.json({ error: "Portfolio not found" }, { status: 404 });
         }
 
-        // Verify portfolio ownership
-        const portfolio = await Portfolio.findOne({ _id: portfolioId, userId: session.user.id });
-        if (!portfolio) {
-            return NextResponse.json({ error: "Portfolio not found or unauthorized" }, { status: 404 });
+        const userId = (session.user as any).id;
+        if (portfolio.userId.toString() !== userId) {
+            return NextResponse.json({ error: "Unauthorized access to portfolio" }, { status: 403 });
         }
 
         const projects = await Project.find({ portfolioId });
@@ -41,19 +51,28 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        await connectDB();
         const session = await getServerSession(authOptions);
-
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user?.email) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await request.json();
 
-        // Verify portfolio ownership
-        const portfolio = await Portfolio.findOne({ _id: body.portfolioId, userId: session.user.id });
+        if (!body.portfolioId) {
+            return NextResponse.json({ error: "portfolioId is required" }, { status: 400 });
+        }
+
+        await connectDB();
+
+        // Verify ownership
+        const portfolio = await Portfolio.findById(body.portfolioId);
         if (!portfolio) {
-            return NextResponse.json({ error: "Portfolio not found or unauthorized" }, { status: 404 });
+            return NextResponse.json({ error: "Portfolio not found" }, { status: 404 });
+        }
+
+        const userId = (session.user as any).id;
+        if (portfolio.userId.toString() !== userId) {
+            return NextResponse.json({ error: "Unauthorized to modify portfolio" }, { status: 403 });
         }
 
         const project = await Project.create(body);

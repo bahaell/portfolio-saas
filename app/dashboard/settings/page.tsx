@@ -1,40 +1,43 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import apiService, { ApiUser } from "@/lib/api"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-// import { currentUser } from "@/lib/mock-data"
 import { CreditCard, Bell, Shield, Palette, Check, Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
-import apiService, { ApiUser } from "@/lib/api"
 
 export default function SettingsPage() {
   const [user, setUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
       try {
         const userData = await apiService.getMe()
         setUser(userData)
       } catch (error) {
-        console.error("Failed to load user", error)
+        console.error("Failed to fetch user:", error)
       } finally {
         setLoading(false)
       }
     }
-    fetchData()
+    fetchUser()
   }, [])
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="flex justify-center p-8">
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     )
   }
 
   if (!user) {
-    return <div>Failed to load user settings</div>
+    return (
+      <div className="max-w-2xl mx-auto p-4">
+        Failed to load user settings. Please try again.
+      </div>
+    )
   }
 
   return (

@@ -1,55 +1,46 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Sidebar } from "@/components/dashboard/sidebar"
-import { Topbar } from "@/components/dashboard/topbar"
-import { useEffect, useState } from "react"
-import apiService, { ApiUser } from "@/lib/api"
-import { Loader2 } from "lucide-react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react";
+import { Sidebar } from "@/components/dashboard/sidebar";
+import { Topbar } from "@/components/dashboard/topbar";
+import apiService, { ApiUser } from "@/lib/api";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [user, setUser] = useState<ApiUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<ApiUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login")
-      return
-    }
-
-    if (status === "authenticated") {
-      const fetchUser = async () => {
-        try {
-          const userData = await apiService.getMe()
-          setUser(userData)
-        } catch (error) {
-          console.error("Failed to load user", error)
-        } finally {
-          setLoading(false)
-        }
+    const fetchUser = async () => {
+      try {
+        const userData = await apiService.getMe();
+        setUser(userData);
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      } finally {
+        setLoading(false);
       }
-      fetchUser()
-    }
-  }, [status, router])
+    };
+    fetchUser();
+  }, []);
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
+  // Fallback if user fetch failed (e.g. not logged in) - typically handled by middleware or redirect
+  // For now we render the layout with empty/default data or redirect
   if (!user) {
-    return <div>Failed to load user data</div>
+    // In a real app we might redirect to login here if not handled by middleware
+    return null;
   }
 
   return (
@@ -60,5 +51,5 @@ export default function DashboardLayout({
         <main className="flex-1 p-6 lg:p-8 overflow-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

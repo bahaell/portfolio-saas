@@ -1,0 +1,81 @@
+
+> my-v0-project@0.1.0 build D:\portfolio-saas
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Ôû▓ Next.js 16.0.10 (Turbopack)
+   - Environments: .env.local
+
+ ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+> Build error occurred
+Error: Turbopack build failed with 4 errors:
+./app/dashboard/portfolios/[id]/page.tsx:1:20
+Ecmascript file had an error
+> 1 | import { useState, useEffect } from "react"
+    |                    ^^^^^^^^^
+  2 | import { useParams, useRouter } from "next/navigation"
+  3 | import apiService, { ApiPortfolio, ApiUser, ApiProject, ApiSkill } from "@/lib/api"
+  4 | import { Button } from "@/components/ui/button"
+
+You're importing a component that needs `useEffect`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+./app/dashboard/portfolios/[id]/page.tsx:2:10
+Ecmascript file had an error
+  1 | import { useState, useEffect } from "react"
+> 2 | import { useParams, useRouter } from "next/navigation"
+    |          ^^^^^^^^^
+  3 | import apiService, { ApiPortfolio, ApiUser, ApiProject, ApiSkill } from "@/lib/api"
+  4 | import { Button } from "@/components/ui/button"
+  5 | import { Card } from "@/components/ui/card"
+
+You're importing a component that needs `useParams`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+./app/dashboard/portfolios/[id]/page.tsx:2:21
+Ecmascript file had an error
+  1 | import { useState, useEffect } from "react"
+> 2 | import { useParams, useRouter } from "next/navigation"
+    |                     ^^^^^^^^^
+  3 | import apiService, { ApiPortfolio, ApiUser, ApiProject, ApiSkill } from "@/lib/api"
+  4 | import { Button } from "@/components/ui/button"
+  5 | import { Card } from "@/components/ui/card"
+
+You're importing a component that needs `useRouter`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+./app/dashboard/portfolios/[id]/page.tsx:1:10
+Ecmascript file had an error
+> 1 | import { useState, useEffect } from "react"
+    |          ^^^^^^^^
+  2 | import { useParams, useRouter } from "next/navigation"
+  3 | import apiService, { ApiPortfolio, ApiUser, ApiProject, ApiSkill } from "@/lib/api"
+  4 | import { Button } from "@/components/ui/button"
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+    at <unknown> (./app/dashboard/portfolios/[id]/page.tsx:1:20)
+    at <unknown> (./app/dashboard/portfolios/[id]/page.tsx:2:10)
+    at <unknown> (./app/dashboard/portfolios/[id]/page.tsx:2:21)
+    at <unknown> (./app/dashboard/portfolios/[id]/page.tsx:1:10)
+ÔÇëELIFECYCLEÔÇë Command failed with exit code 1.

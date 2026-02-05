@@ -1,6 +1,6 @@
 "use client"
 
-import type { ApiUser } from "@/lib/api"
+import { ApiUser } from "@/lib/api"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Settings, LogOut, Moon, Sun, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-// import { logoutMock } from "@/lib/auth-mock"
 import { useThemeMode } from "@/lib/hooks/useThemeMode"
 import { NotificationDropdown } from "./notification-dropdown"
 
@@ -26,8 +25,8 @@ export function Topbar({ user, pageTitle }: TopbarProps) {
   const { mode, toggleThemeMode, mounted } = useThemeMode()
 
   const handleLogout = () => {
-    // logoutMock()
-    // For now, redirect to login which serves as logout in this demo state
+    // Implement real logout logic here (e.g. call API or clear tokens)
+    // For now, redirect to login
     window.location.href = "/auth/login"
   }
   return (
@@ -57,6 +56,7 @@ export function Topbar({ user, pageTitle }: TopbarProps) {
                   <p className="text-xs text-muted-foreground">{user.plan === "PREMIUM" ? "Pro" : "Free"}</p>
                 </div>
                 <Avatar className="w-9 h-9">
+                  {/* ApiUser doesn't have avatar yet, use placeholder */}
                   <AvatarImage src={"/placeholder.svg"} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>

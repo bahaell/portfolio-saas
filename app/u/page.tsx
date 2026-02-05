@@ -1,4 +1,4 @@
-// import { publicPortfolios } from "@/lib/public-mock-data"
+import { getAllPublicPortfolios } from "@/lib/public-api"
 import Link from "next/link"
 
 export const metadata = {
@@ -6,9 +6,8 @@ export const metadata = {
   description: "Explore amazing portfolios created with Portfora",
 }
 
-export default function PublioPortfoliosIndex() {
-  const portfolios: any[] = [] // Object.values(publicPortfolios).filter((p) => p.published)
-  // Mock data disabled.
+export default async function PublioPortfoliosIndex() {
+  const portfolios = await getAllPublicPortfolios()
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F5FBE6" }}>
@@ -49,7 +48,7 @@ export default function PublioPortfoliosIndex() {
 
         {portfolios.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-muted-foreground">No public portfolios available yet. Check back soon!</p>
+            <p className="text-muted-foreground">No public portfolios available yet.</p>
           </div>
         )}
       </div>

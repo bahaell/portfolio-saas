@@ -1,22 +1,23 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import { User } from "@/models";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth"
+import { authOptions } from "../[...nextauth]/route"
+import { NextResponse } from "next/server"
+import { connectDB } from "@/lib/db"
+import User from "@/models/User"
 
 export async function GET() {
-    await connectDB();
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
 
-    if (!session || !session.user || !session.user.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session || !session.user?.email) {
+        return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    const user = await User.findById(session.user.id);
+    await connectDB()
+
+    const user = await User.findOne({ email: session.user.email })
 
     if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return new NextResponse("User not found", { status: 404 })
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json(user)
 }

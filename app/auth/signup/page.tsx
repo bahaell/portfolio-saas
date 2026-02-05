@@ -33,11 +33,9 @@ export default function SignupPage() {
 
     setIsLoading(true)
     try {
-      // For now, since Step 2.4 focuses on OAuth (Google/GitHub), 
-      // we direct users to the login page where OAuth options are available.
-      // Real email signup could be implemented via /api/auth/register
-      alert("Registration is currently handled via Google or GitHub login. Redirecting to login page.")
-      router.push("/auth/login")
+      // Mock authentication - in production use real auth
+      localStorage.setItem("mock-auth-token", JSON.stringify({ email, authenticated: true, tier: "free" }))
+      router.push("/dashboard/home")
     } finally {
       setIsLoading(false)
     }
